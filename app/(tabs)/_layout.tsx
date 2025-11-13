@@ -2,12 +2,12 @@ import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import Colors from "@/constants/Colors";
 import React from "react";
+import { Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export const unstable_settings = {
-  initialRouteName: "(tabs)",
-};
+const TabsLayout = () => {
+  const insets = useSafeAreaInsets();
 
-const Page = () => {
   return (
     <Tabs
       screenOptions={{
@@ -17,15 +17,19 @@ const Page = () => {
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: "600",
-          marginBottom: 4,
+          marginBottom: Platform.OS === "ios" ? 0 : 4,
         },
         tabBarStyle: {
-          height: 70,
+          position: "absolute",
+          height: 70 + insets.bottom / 2,
           borderTopWidth: 0.5,
-          borderTopColor: "#E5E7EB", // subtle line
-          backgroundColor: "#fff",
-          paddingBottom: 6,
+          borderTopColor: "#E5E7EB",
+          backgroundColor: "#ffffffee",
+          paddingBottom: insets.bottom > 0 ? insets.bottom / 2 : 10,
+          paddingTop: 6,
+          elevation: 8,
         },
+        tabBarHideOnKeyboard: true,
       }}
     >
       <Tabs.Screen
@@ -54,4 +58,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default TabsLayout;
