@@ -24,7 +24,7 @@ export default function Signup() {
     }
 
     try {
-      const res = await fetch("http://172.20.10.5:5000/api/auth/signup", {
+      const res = await fetch("http://10.5.41.85:5000/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
