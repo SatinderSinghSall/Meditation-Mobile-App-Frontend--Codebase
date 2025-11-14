@@ -1,13 +1,20 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Alert } from "react-native";
+import { View, Text, TextInput, Alert, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+
 import CustomButton from "@/components/CustomButton";
 import AppGradient from "@/components/AppGradient";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Login() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -42,32 +49,60 @@ export default function Login() {
 
   return (
     <AppGradient colors={["#161b2e", "#0a4d4a", "#766e67"]}>
-      <SafeAreaView className="flex-1 justify-center px-6">
-        <Text className="text-white text-4xl font-bold mb-6 text-center">
-          Login
-        </Text>
-        <TextInput
-          placeholder="Email"
-          placeholderTextColor="#ccc"
-          value={email}
-          onChangeText={setEmail}
-          className="bg-white/10 text-white px-4 py-3 rounded-xl mb-4"
-        />
-        <TextInput
-          placeholder="Password"
-          placeholderTextColor="#ccc"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-          className="bg-white/10 text-white px-4 py-3 rounded-xl mb-6"
-        />
+      <SafeAreaView className="flex-1 items-center justify-center px-6">
+        {/* Back Button (Safe-area aware) */}
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={{
+            position: "absolute",
+            top: insets.top + 10,
+            left: 16,
+            zIndex: 50,
+          }}
+          className="bg-white/10 px-3 py-2 rounded-full flex-row items-center border border-white/20"
+        >
+          <Ionicons name="chevron-back" size={20} color="white" />
+          <Text className="text-white ml-1 font-medium">Back</Text>
+        </TouchableOpacity>
 
-        <CustomButton title="Login" onPress={handleLogin} />
+        {/* App Name */}
+        <Text className="text-white text-3xl font-semibold mb-8">
+          Meditation App
+        </Text>
+
+        {/* Form Container */}
+        <View className="bg-white/10 w-full p-6 rounded-2xl backdrop-blur-md shadow-lg max-w-md">
+          <Text className="text-white text-3xl font-bold mb-6 text-center">
+            Welcome Back
+          </Text>
+
+          <TextInput
+            placeholder="Email"
+            placeholderTextColor="#bbb"
+            value={email}
+            onChangeText={setEmail}
+            className="bg-white/5 text-white px-4 py-3 rounded-xl mb-4 border border-white/10"
+          />
+
+          <TextInput
+            placeholder="Password"
+            placeholderTextColor="#bbb"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+            className="bg-white/5 text-white px-4 py-3 rounded-xl mb-6 border border-white/10"
+          />
+
+          <CustomButton title="Login" onPress={handleLogin} />
+        </View>
+
+        {/* Signup Link */}
         <Text
-          className="text-center text-gray-300 mt-4"
+          className="text-center text-gray-200 mt-6"
           onPress={() => router.push("/signup")}
         >
-          Don’t have an account? Sign up
+          Don’t have an account?{" "}
+          <Text className="text-white font-semibold">Sign up</Text>
         </Text>
       </SafeAreaView>
     </AppGradient>
