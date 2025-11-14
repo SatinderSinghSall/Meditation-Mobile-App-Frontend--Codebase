@@ -21,6 +21,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AppGradient from "@/components/AppGradient";
 import MEDITATION_IMAGES from "@/constants/meditation-images";
 import { MEDITATION_DATA } from "@/constants/MeditationData";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 const { width } = Dimensions.get("window");
 
@@ -29,6 +30,10 @@ const Page = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
+  const [confirmVisible, setConfirmVisible] = useState(false);
+
+  const openConfirm = () => setConfirmVisible(true);
+  const closeConfirm = () => setConfirmVisible(false);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -151,7 +156,7 @@ const Page = () => {
               <TouchableOpacity
                 onPress={() => {
                   setMenuVisible(false);
-                  handleLogout();
+                  openConfirm();
                 }}
                 activeOpacity={0.85}
                 style={styles.menuItem}
@@ -197,6 +202,20 @@ const Page = () => {
               </ImageBackground>
             </Pressable>
           )}
+        />
+
+        <ConfirmDialog
+          visible={confirmVisible}
+          title="Logout?"
+          message="Are you sure you want to log out?"
+          confirmText="Logout"
+          cancelText="Cancel"
+          confirmColor="#dc2626"
+          onCancel={closeConfirm}
+          onConfirm={() => {
+            closeConfirm();
+            handleLogout();
+          }}
         />
       </AppGradient>
       <StatusBar style="light" />
