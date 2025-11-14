@@ -1,6 +1,7 @@
-import { View, Text, TextInput } from "react-native";
 import React, { useState } from "react";
+import { View, Text, TextInput, Alert } from "react-native";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomButton from "@/components/CustomButton";
 import AppGradient from "@/components/AppGradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -10,10 +11,33 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
-    // TODO: connect to backend or Firebase
-    console.log("Logging in with", email, password);
-    router.replace("/(tabs)/nature-meditate");
+  const handleLogin = async () => {
+    if (!email || !password) {
+      return Alert.alert("Missing Fields", "Please enter email and password.");
+    }
+
+    try {
+      const res = await fetch("http://172.20.10.5:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return Alert.alert("Login Failed", data.message || "Try again.");
+      }
+
+      await AsyncStorage.setItem("token", data.token);
+      await AsyncStorage.setItem("user", JSON.stringify(data.user));
+
+      Alert.alert("Welcome", `Hi ${data.user.name}!`);
+      router.replace("/(tabs)/nature-meditate");
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Unable to connect to server.");
+    }
   };
 
   return (
