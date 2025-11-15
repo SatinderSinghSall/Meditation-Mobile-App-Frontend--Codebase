@@ -10,129 +10,184 @@ import MEDITATION_IMAGES from "@/constants/meditation-images";
 import { TimerContext } from "@/context/TimerContext";
 import { MEDITATION_DATA, AUDIO_FILES } from "@/constants/MeditationData";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { addMeditation } from "@/api/meditationApi";
+
 const Page = () => {
-    const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams();
 
-    const { duration: secondsRemaining, setDuration } =
-        useContext(TimerContext);
+  const {
+    duration: secondsRemaining,
+    setDuration,
+    initialDuration,
+    setInitialDuration,
+  } = useContext(TimerContext);
 
-    const [isMeditating, setMeditating] = useState(false);
-    const [audioSound, setSound] = useState<Audio.Sound>();
-    const [isPlayingAudio, setPlayingAudio] = useState(false);
+  const [isMeditating, setMeditating] = useState(false);
+  const [audioSound, setSound] = useState<Audio.Sound | null>(null);
+  const [isPlayingAudio, setPlayingAudio] = useState(false);
+  const [sessionSaved, setSessionSaved] = useState(false);
 
-    useEffect(() => {
-        let timerId: NodeJS.Timeout;
+  const handleSessionComplete = async () => {
+    try {
+      if (sessionSaved) return;
+      setSessionSaved(true);
 
-        // Exit early when we reach 0
-        if (secondsRemaining === 0) {
-            if (isPlayingAudio) audioSound?.pauseAsync();
-            setMeditating(false);
-            setPlayingAudio(false);
-            return;
-        }
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
 
-        if (isMeditating) {
-            // Save the interval ID to clear it when the component unmounts
-            timerId = setTimeout(() => {
-                setDuration(secondsRemaining - 1);
-            }, 1000);
-        }
+      const minutes = Math.max(1, Math.round(initialDuration / 60));
 
-        // Clear timeout if the component is unmounted or the time left changes
-        return () => {
-            clearTimeout(timerId);
-        };
-    }, [secondsRemaining, isMeditating]);
+      const medId = String(id);
+      const medTitle = MEDITATION_DATA[Number(id) - 1]?.title || null;
 
-    useEffect(() => {
-        return () => {
-            setDuration(10);
-            audioSound?.unloadAsync();
-        };
-    }, [audioSound]);
+      console.log("Saving meditation:", minutes, medId, medTitle);
 
-    const initializeSound = async () => {
-        const audioFileName = MEDITATION_DATA[Number(id) - 1].audio;
+      await addMeditation(minutes, medId, medTitle, token);
+      console.log("Meditation saved to backend!");
 
-        const { sound } = await Audio.Sound.createAsync(
-            AUDIO_FILES[audioFileName]
-        );
-        setSound(sound);
-        return sound;
-    };
+      setDuration(initialDuration);
+    } catch (err) {
+      console.log("Error saving meditation:", err);
+    }
+  };
 
-    const togglePlayPause = async () => {
-        const sound = audioSound ? audioSound : await initializeSound();
+  // Timer
+  useEffect(() => {
+    let timerId: NodeJS.Timeout | undefined;
 
-        const status = await sound?.getStatusAsync();
+    if (secondsRemaining === 0) {
+      if (isPlayingAudio) audioSound?.pauseAsync().catch(() => {});
+      setMeditating(false);
+      setPlayingAudio(false);
 
-        if (status?.isLoaded && !isPlayingAudio) {
-            await sound?.playAsync();
-            setPlayingAudio(true);
-        } else {
-            await sound?.pauseAsync();
-            setPlayingAudio(false);
-        }
-    };
-
-    async function toggleMeditationSessionStatus() {
-        if (secondsRemaining === 0) setDuration(10);
-
-        setMeditating(!isMeditating);
-
-        await togglePlayPause();
+      handleSessionComplete();
+      return;
     }
 
-    const handleAdjustDuration = () => {
-        if (isMeditating) toggleMeditationSessionStatus();
+    if (isMeditating) {
+      timerId = setTimeout(() => setDuration(secondsRemaining - 1), 1000);
+    }
 
-        router.push("/(modal)/adjust-meditation-duration");
+    return () => {
+      if (timerId) clearTimeout(timerId);
     };
+  }, [secondsRemaining, isMeditating]);
 
-    // Format the timeLeft to ensure two digits are displayed
-    const formattedTimeMinutes = String(
-        Math.floor(secondsRemaining / 60)
-    ).padStart(2, "0");
-    const formattedTimeSeconds = String(secondsRemaining % 60).padStart(2, "0");
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      if (audioSound) {
+        audioSound.unloadAsync().catch(() => {});
+      }
+      setSessionSaved(false);
+    };
+  }, [audioSound]);
 
-    return (
-        <View className="flex-1">
-            <ImageBackground
-                source={MEDITATION_IMAGES[Number(id) - 1]}
-                resizeMode="cover"
-                className="flex-1"
-            >
-                <AppGradient colors={["transparent", "rgba(0,0,0,0.8)"]}>
-                    <Pressable
-                        onPress={() => router.back()}
-                        className="absolute top-16 left-6 z-10"
-                    >
-                        <AntDesign name="leftcircleo" size={50} color="white" />
-                    </Pressable>
+  // Initialize audio with safe checks + logs
+  const initializeSound = async (): Promise<Audio.Sound | null> => {
+    try {
+      const audioFileName = MEDITATION_DATA[Number(id) - 1]?.audio;
+      if (!audioFileName) {
+        console.warn("No audio filename for meditation id", id);
+        return null;
+      }
 
-                    <View className="flex-1 justify-center">
-                        <View className="mx-auto bg-neutral-200 rounded-full w-44 h-44 justify-center items-center">
-                            <Text className="text-4xl text-blue-800 font-rmono">
-                                {formattedTimeMinutes}.{formattedTimeSeconds}
-                            </Text>
-                        </View>
-                    </View>
+      const asset = AUDIO_FILES[audioFileName];
+      if (!asset) {
+        console.error("AUDIO_FILES missing entry for:", audioFileName);
+        return null;
+      }
 
-                    <View className="mb-5">
-                        <CustomButton
-                            title="Adjust duration"
-                            onPress={handleAdjustDuration}
-                        />
-                        <CustomButton
-                            title={isMeditating ? "Stop" : "Start Meditation"}
-                            onPress={toggleMeditationSessionStatus}
-                            containerStyles="mt-4"
-                        />
-                    </View>
-                </AppGradient>
-            </ImageBackground>
-        </View>
-    );
+      // createAsync accepts the require() result
+      const result = await Audio.Sound.createAsync(asset, {
+        shouldPlay: false,
+      });
+      const { sound } = result;
+      setSound(sound);
+      return sound;
+    } catch (err) {
+      console.error("Error initializing sound:", err);
+      return null;
+    }
+  };
+
+  const togglePlayPause = async () => {
+    try {
+      const sound = audioSound ?? (await initializeSound());
+      if (!sound) return;
+
+      const status = await sound.getStatusAsync();
+      if (status.isLoaded && !isPlayingAudio) {
+        await sound.playAsync();
+        setPlayingAudio(true);
+      } else {
+        await sound.pauseAsync();
+        setPlayingAudio(false);
+      }
+    } catch (err) {
+      console.error("Error togglePlayPause:", err);
+    }
+  };
+
+  async function toggleMeditationSessionStatus() {
+    if (secondsRemaining === 0) {
+      setDuration(initialDuration);
+      setSessionSaved(false);
+    }
+
+    setMeditating((p) => !p);
+    await togglePlayPause();
+  }
+
+  const handleAdjustDuration = () => {
+    if (isMeditating) toggleMeditationSessionStatus();
+    router.push("/(modal)/adjust-meditation-duration");
+  };
+
+  const formattedTimeMinutes = String(
+    Math.floor(secondsRemaining / 60)
+  ).padStart(2, "0");
+  const formattedTimeSeconds = String(secondsRemaining % 60).padStart(2, "0");
+
+  return (
+    <View className="flex-1">
+      <ImageBackground
+        source={MEDITATION_IMAGES[Number(id) - 1]}
+        resizeMode="cover"
+        className="flex-1"
+      >
+        <AppGradient colors={["transparent", "rgba(0,0,0,0.8)"]}>
+          <Pressable
+            onPress={() => router.back()}
+            className="absolute top-16 left-6 z-10"
+          >
+            <AntDesign name="left" size={40} color="white" />
+          </Pressable>
+
+          <View className="flex-1 justify-center">
+            <View className="mx-auto bg-neutral-200 rounded-full w-44 h-44 justify-center items-center">
+              <Text className="text-4xl text-blue-800 font-rmono">
+                {formattedTimeMinutes}.{formattedTimeSeconds}
+              </Text>
+            </View>
+          </View>
+
+          <View className="mb-5">
+            <CustomButton
+              title="Adjust duration"
+              onPress={handleAdjustDuration}
+            />
+            <CustomButton
+              title={isMeditating ? "Stop" : "Start Meditation"}
+              onPress={toggleMeditationSessionStatus}
+              containerStyles="mt-4"
+            />
+          </View>
+        </AppGradient>
+      </ImageBackground>
+    </View>
+  );
 };
 
 export default Page;

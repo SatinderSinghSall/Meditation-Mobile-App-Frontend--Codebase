@@ -8,6 +8,8 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 
 import beachImage from "@/assets/meditation-images/beach.webp";
 
+// To run the apps frontend / mobile (development) -  npx expo start -c
+
 export default function Index() {
   const router = useRouter();
 
