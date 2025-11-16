@@ -7,7 +7,7 @@ import {
 } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
-import CustomButton from "@/components/CustomButton";
+import AuthButton from "@/components/AuthButton";
 import AppGradient from "@/components/AppGradient";
 
 export default function Signup() {
@@ -17,14 +17,18 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
     if (!name || !email || !password) {
       return Alert.alert("Missing Fields", "Please fill in all fields.");
     }
 
+    setLoading(true);
+
     try {
-      const res = await fetch("http://10.5.41.85:5000/api/auth/signup", {
+      const res = await fetch("http://172.20.10.5:5000/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
@@ -33,13 +37,16 @@ export default function Signup() {
       const data = await res.json();
 
       if (!res.ok) {
+        setLoading(false);
         return Alert.alert("Signup Failed", data.message || "Try again.");
       }
 
+      setLoading(false);
       Alert.alert("Success", "Account created! Please login now.");
       router.replace("/login");
     } catch (err) {
       console.error(err);
+      setLoading(false);
       Alert.alert("Error", "Unable to connect to the server.");
     }
   };
@@ -89,16 +96,34 @@ export default function Signup() {
             className="bg-white/5 text-white px-4 py-3 rounded-xl mb-4 border border-white/10"
           />
 
-          <TextInput
-            placeholder="Password"
-            placeholderTextColor="#bbb"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-            className="bg-white/5 text-white px-4 py-3 rounded-xl mb-6 border border-white/10"
-          />
+          <View className="relative mb-6">
+            <TextInput
+              placeholder="Password"
+              placeholderTextColor="#bbb"
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+              className="bg-white/5 text-white px-4 py-3 rounded-xl border border-white/10 pr-12"
+            />
 
-          <CustomButton title="Sign Up" onPress={handleSignup} />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-3"
+            >
+              <Ionicons
+                name={showPassword ? "eye-off" : "eye"}
+                size={22}
+                color="white"
+              />
+            </TouchableOpacity>
+          </View>
+
+          <AuthButton
+            title="Sign Up"
+            loading={loading}
+            loadingText="Creating account..."
+            onPress={handleSignup}
+          />
         </View>
 
         {/* Login Link */}
