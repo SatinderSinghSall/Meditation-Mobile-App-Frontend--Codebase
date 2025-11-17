@@ -10,6 +10,8 @@ import { Ionicons } from "@expo/vector-icons";
 import AuthButton from "@/components/AuthButton";
 import AppGradient from "@/components/AppGradient";
 
+import { signup } from "@/api/authApi";
+
 export default function Signup() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -28,26 +30,15 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://172.20.10.5:5000/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setLoading(false);
-        return Alert.alert("Signup Failed", data.message || "Try again.");
-      }
+      const data = await signup(name, email, password);
 
       setLoading(false);
       Alert.alert("Success", "Account created! Please login now.");
       router.replace("/login");
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setLoading(false);
-      Alert.alert("Error", "Unable to connect to the server.");
+      Alert.alert("Signup Failed", err.message || "Try again.");
     }
   };
 

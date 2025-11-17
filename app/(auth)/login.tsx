@@ -11,6 +11,8 @@ import { Ionicons } from "@expo/vector-icons";
 import AuthButton from "@/components/AuthButton";
 import AppGradient from "@/components/AppGradient";
 
+import { login } from "@/api/authApi";
+
 export default function Login() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -27,18 +29,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://172.20.10.5:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setLoading(false);
-        return Alert.alert("Login Failed", data.message || "Try again.");
-      }
+      const data = await login(email, password);
 
       await AsyncStorage.setItem("token", data.token);
       await AsyncStorage.setItem("user", JSON.stringify(data.user));
@@ -47,10 +38,10 @@ export default function Login() {
 
       Alert.alert("Welcome", `Hi ${data.user.name}!`);
       router.replace("/(tabs)/nature-meditate");
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setLoading(false);
-      Alert.alert("Error", "Unable to connect to server.");
+      Alert.alert("Login Failed", err.message || "Try again.");
     }
   };
 

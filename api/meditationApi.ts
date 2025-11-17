@@ -1,4 +1,4 @@
-const API_BASE = "http://172.20.10.5:5000/api";
+import { API_BASE } from "./api";
 
 export async function getStats(token: string) {
   const res = await fetch(`${API_BASE}/meditation/stats`, {
