@@ -1,1 +1,3 @@
-export const API_BASE = "http://172.20.10.5:5000/api";
+import Constants from "expo-constants";
+
+export const API_BASE = Constants.expoConfig?.extra?.API_BASE;
