@@ -8,6 +8,16 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 
 import beachImage from "@/assets/meditation-images/beach.webp";
 
+/*
+ 🚀 Frontend Mobile Commands:
+
+ ▶️ Development Mode:
+ npx expo start -c
+
+ ▶️ Production Mode:
+ NODE_ENV=production npx expo start
+*/
+
 // To run the apps frontend / mobile (development) -  npx expo start -c
 
 export default function Index() {
