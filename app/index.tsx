@@ -5,8 +5,10 @@ import CustomButton from "@/components/CustomButton";
 import AppGradient from "@/components/AppGradient";
 import { useRouter } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { useEffect } from "react";
 
 import beachImage from "@/assets/meditation-images/beach.webp";
+import { wakeServer } from "@/api/wakeServer";
 
 /*
  🚀 Frontend Mobile Commands:
@@ -22,6 +24,11 @@ import beachImage from "@/assets/meditation-images/beach.webp";
 
 export default function Index() {
   const router = useRouter();
+
+  // Wake apps backend server silently on app start
+  useEffect(() => {
+    wakeServer();
+  }, []);
 
   return (
     <View className="flex-1">

@@ -22,12 +22,17 @@ export default {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff",
       },
+      package: "com.meditationapp.app",
+      versionCode: 1,
     },
     web: {
       favicon: "./assets/favicon.png",
     },
     extra: {
       API_BASE: process.env.API_BASE,
+      eas: {
+        projectId: "e0807912-b7af-4a54-941a-a76ad085f9e3",
+      },
     },
     plugins: ["expo-router", "expo-font"],
   },
