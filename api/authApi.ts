@@ -1,5 +1,8 @@
 import { API_BASE } from "./api";
 
+// 🔍 DEBUG: Check API_BASE in build
+console.log("🔍 API BASE USED IN APK:", API_BASE);
+
 async function request(endpoint: string, method = "GET", body?: any) {
   const options: RequestInit = {
     method,
