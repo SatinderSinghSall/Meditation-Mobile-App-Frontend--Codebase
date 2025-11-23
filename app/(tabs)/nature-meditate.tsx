@@ -23,6 +23,8 @@ import AppGradient from "@/components/AppGradient";
 import MEDITATION_IMAGES from "@/constants/meditation-images";
 import { MEDITATION_DATA } from "@/constants/MeditationData";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import WeeklyGraph from "@/components/WeeklyGraph";
+
 import { getStats } from "@/api/meditationApi";
 
 const { width } = Dimensions.get("window");
@@ -207,34 +209,7 @@ const Page = () => {
       </View>
 
       {/* Weekly graph */}
-      <View style={styles.graphContainer}>
-        <Text style={styles.graphTitle}>This Week</Text>
-
-        <View style={styles.graphBarRow}>
-          {(stats.weeklyChart.length
-            ? stats.weeklyChart
-            : [
-                { day: "M", value: 0 },
-                { day: "T", value: 0 },
-                { day: "W", value: 0 },
-                { day: "T", value: 0 },
-                { day: "F", value: 0 },
-                { day: "S", value: 0 },
-                { day: "S", value: 0 },
-              ]
-          ).map((item, idx) => (
-            <View key={idx} style={styles.graphBarItem}>
-              <View
-                style={[
-                  styles.graphBar,
-                  { height: item.value === 0 ? 4 : Math.max(4, item.value) },
-                ]}
-              />
-              <Text style={styles.graphDay}>{item.day}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
+      <WeeklyGraph data={stats.weeklyChart} />
     </View>
   );
 
@@ -524,39 +499,6 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     textAlign: "center",
     lineHeight: 22,
-  },
-
-  graphContainer: {
-    backgroundColor: "rgba(255,255,255,0.05)",
-    padding: 20,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.09)",
-    marginBottom: 20,
-  },
-  graphTitle: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 15,
-  },
-  graphBarRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-  },
-  graphBarItem: {
-    alignItems: "center",
-  },
-  graphBar: {
-    width: 12,
-    backgroundColor: "white",
-    borderRadius: 6,
-  },
-  graphDay: {
-    color: "rgba(255,255,255,0.7)",
-    marginTop: 6,
-    fontSize: 12,
   },
 
   statsGrid: {
