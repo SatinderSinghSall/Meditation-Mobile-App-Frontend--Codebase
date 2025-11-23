@@ -18,6 +18,9 @@ import { wakeServer } from "@/api/wakeServer";
 
  ▶️ Production Mode:
  NODE_ENV=production npx expo start
+
+  ▶️ Production Build for Android:
+  eas build -p android --profile preview
 */
 
 // To run the apps frontend / mobile (development) -  npx expo start -c
@@ -38,7 +41,10 @@ export default function Index() {
         className="flex-1"
       >
         <AppGradient colors={["rgba(0,0,0,0.4)", "rgba(0,0,0,0.8)"]}>
-          <SafeAreaView className="flex flex-1 px-1 justify-between">
+          <SafeAreaView
+            edges={["top"]}
+            className="flex flex-1 px-1 justify-between"
+          >
             <Animated.View
               entering={FadeInDown.delay(300)
                 .mass(0.5)

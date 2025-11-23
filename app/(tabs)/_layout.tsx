@@ -2,7 +2,6 @@ import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import Colors from "@/constants/Colors";
 import React from "react";
-import { Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const TabsLayout = () => {
@@ -17,15 +16,13 @@ const TabsLayout = () => {
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: "600",
-          marginBottom: Platform.OS === "ios" ? 0 : 4,
         },
         tabBarStyle: {
-          position: "absolute",
-          height: 70 + insets.bottom / 2,
+          height: 60 + insets.bottom,
           borderTopWidth: 0.5,
           borderTopColor: "#E5E7EB",
           backgroundColor: "#ffffffee",
-          paddingBottom: insets.bottom > 0 ? insets.bottom / 2 : 10,
+          paddingBottom: insets.bottom,
           paddingTop: 6,
           elevation: 8,
         },
